@@ -11,6 +11,14 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
+# ignore idea settings file
 .idea
-*\.idea
-*\.idea\*
+*/.idea
+*/.idea/*
+
+# ignore log file
+*/logs/*
+
+# ignore cert file
+*/cert/*
+*/certs/*
