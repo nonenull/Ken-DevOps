@@ -16,9 +16,11 @@
 */.idea
 */.idea/*
 
-# ignore log file
-*/logs/*
+# ignore project file
+pkg/
+
+src/*/src/logs/*
 
 # ignore cert file
-*/cert/*
-*/certs/*
+./src/*/src/cert/
+./src/*/src/certs/
