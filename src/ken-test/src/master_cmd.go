@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 2000; i++ {
 		go testCase(i)
 	}
 	for {
