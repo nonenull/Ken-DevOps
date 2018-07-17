@@ -173,9 +173,9 @@ func CreateAndSend() {
 	privateOK, _ := isExist(privateCertPath)
 	publicOK, _ := isExist(publicCertPath)
 	logger.Debug(privateOK, publicOK)
-	//if !privateOK || ! publicOK {
-	cert := &Cert{}
-	cert.CreateCert()
-	cert.SendCertToMaster()
-	//}
+	if !privateOK || ! publicOK {
+		cert := &Cert{}
+		cert.CreateCert()
+		cert.SendCertToMaster()
+	}
 }

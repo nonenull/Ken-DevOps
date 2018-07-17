@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"encoding/json"
 	"ken-common/src/ken-config"
+	"log"
 )
 
 type IParse interface {
@@ -25,6 +26,7 @@ func (self *Connect) Handle() {
 	readBuf := make([]byte, ken_config.ReadBuffSize)
 	for {
 		readLen, err := self.Conn.Read(readBuf)
+		//log.Print("read data : ", string(readBuf[:readLen]))
 		// 当有错误时间发生时，跳出循环，将断开连接
 		// 短链接在此触发io.EOF,跳出循环，断开连接
 		if err != nil {

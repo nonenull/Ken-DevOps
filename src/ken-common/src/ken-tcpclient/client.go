@@ -32,7 +32,11 @@ func (self *Client) Send(requestData string) ([]byte, error) {
 	} else {
 		requestData = ken_config.NoKeepAliveTag + ken_config.LineTag + requestData
 	}
-	self.Conn.Write([]byte(requestData))
+	_, wErr := self.Conn.Write([]byte(requestData))
+	if wErr != nil {
+		//logger.Error("client 写入错误: ", wErr)
+		panic(wErr)
+	}
 	readBuf := make([]byte, ken_config.ReadBuffSize)
 	endTagByte := []byte(ken_config.EndTag)
 	var response []byte
@@ -95,6 +99,9 @@ func (self *Client) GetCert(certFile []byte) (*x509.CertPool, error) {
 *	检查数据格式是否符合标准
 */
 func (self *Client) Check(data string) bool {
+	if data == ""{
+		return true
+	}
 	return strings.Contains(data, ken_config.EndTag)
 }
 

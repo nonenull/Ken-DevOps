@@ -6,7 +6,6 @@ import (
 	"errors"
 	"ken-common/src/ken-tcpserver"
 	"ken-master/src/logger"
-	"fmt"
 )
 
 func Request(v map[string]interface{}) (result string, isOK bool, err error) {
@@ -16,18 +15,12 @@ func Request(v map[string]interface{}) (result string, isOK bool, err error) {
 	hostname := argsSplit[1]
 	function := argsSplit[2]
 	args := strings.Join(argsSplit[3:], " ")
-	//conn := v["conn"].(*ken_tcpserver.Connect)
-	proxyCMD := ProxyCMD{
+	responseData, responseErr := NewRequest(
 		hostname,
 		function,
 		args,
 		keepAlive == "true",
-	}
-	responseData, err := proxyCMD.Start()
-	if err != nil {
-		logger.Error("代理连接发生错误:", err)
-	}
-
+	)
 	//json str 转struct
 	var response ken_tcpserver.Response
 	if jsonErr := json.Unmarshal(responseData, &response); jsonErr == nil {
@@ -35,7 +28,10 @@ func Request(v map[string]interface{}) (result string, isOK bool, err error) {
 		isOK = response.IsOK
 		err = errors.New(response.Error)
 	} else {
-		err = errors.New(fmt.Sprint("执行发生错误:", jsonErr.Error()))
+		logger.Debug("获取结果发生错误jsonErr : ", jsonErr.Error())
+		logger.Debug("获取结果发生错误responseData : ", string(responseData))
+		logger.Debug("获取结果发生错误responseErr : ", responseErr)
+		err = errors.New(responseErr.Error())
 	}
 	return
 }

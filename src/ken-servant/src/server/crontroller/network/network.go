@@ -2,14 +2,12 @@ package network
 
 import (
 	"errors"
-	"time"
 	"ken-master/src/logger"
-	"math/rand"
 )
 
 func GetIP(v interface{}) (string, bool, error) {
-	t := rand.Intn(5)
-	time.Sleep(time.Duration(t) * time.Second)
+	//t := rand.Intn(5)
+	//time.Sleep(time.Duration(t) * time.Second)
 	request := v.(map[string]interface{})
 	args := request["args"].(map[string]string)
 	logger.Debug("args...==", args)

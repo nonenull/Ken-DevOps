@@ -37,7 +37,7 @@ func (self *Server) Start() {
 	for {
 		// 接受新连接
 		var conn, acceptErr = listener.Accept()
-		//log.Println("获取到新连接: ", conn.RemoteAddr())
+//		log.Println("获取到新连接: ", conn.RemoteAddr())
 		if acceptErr != nil {
 			log.Println(fmt.Errorf("接受连接失败：", acceptErr))
 			break
