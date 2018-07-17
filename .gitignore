@@ -18,9 +18,10 @@
 
 # ignore project file
 pkg/
+*/pkg/
 
-src/*/src/logs/*
+logs/
 
 # ignore cert file
-./src/*/src/cert/
-./src/*/src/certs/
+cert/
+certs/
