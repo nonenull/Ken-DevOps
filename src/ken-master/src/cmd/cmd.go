@@ -7,6 +7,8 @@ import (
 	"ken-common/src/ken-tcpclient"
 	"ken-master/src/logger"
 	"os"
+	"ken-common/src/ken-tcpserver"
+	"encoding/json"
 )
 
 /*
@@ -34,7 +36,7 @@ func NewCMD() {
 	var funcArgsList []string
 	if !isKeepAlive {
 		funcArgsList = args[1:]
-	}else{
+	} else {
 		funcArgsList = args[:]
 	}
 	funcArgs := strings.Join(funcArgsList, " ")
@@ -45,7 +47,7 @@ func NewCMD() {
 		false,
 	)
 	if clientErr != nil {
-		logger.Error("连接 Master-Server 发生错误: ", clientErr)
+		logger.Error("连接 Master-Server 发生错误: \n", clientErr)
 		return
 	}
 	result, resultErr := client.Send(
@@ -55,8 +57,26 @@ func NewCMD() {
 		),
 	)
 	if resultErr != nil {
-		logger.Error("连接 Servant-Server 发生错误: ", resultErr)
+		logger.Error("连接 Servant-Server 发生错误: \n", resultErr)
 		return
 	}
-	logger.Debug("result~~~~ ", string(result))
+	pretyCMD(result)
+}
+
+func pretyCMD(responseData []byte) {
+	var response ken_tcpserver.Response
+	if jsonErr := json.Unmarshal(responseData, &response); jsonErr == nil {
+		pretyResult := fmt.Sprintf(`
+	状态:
+		%t
+	执行结果:
+		%s
+	错误:
+		%s
+			`,response.IsOK, response.Result, response.Error)
+
+		logger.Info(pretyResult)
+	} else {
+		logger.Exception("解析结果发生错误: \n", jsonErr)
+	}
 }
