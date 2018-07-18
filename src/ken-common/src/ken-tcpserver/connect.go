@@ -6,7 +6,6 @@ import (
 	"reflect"
 	"encoding/json"
 	"ken-common/src/ken-config"
-	"log"
 )
 
 type IParse interface {
