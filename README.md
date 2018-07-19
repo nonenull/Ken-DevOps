@@ -10,9 +10,19 @@ Ken-DevOps
         |
         | -- src
               |
-              | -- ken-common   主要保存一些公共包
+              | -- ken-common   主要保存一些公共包, 具体看包名便知
               | -- ken-master   Master端代码
+                    | -- bin    保存编译脚本, 编译文件等
+                    | -- certs  保存Servant 公钥目录
+                    | -- conf   配置目录
+                    | -- logs   日志目录
+                    | -- src    源码目录
               | -- ken-servant  Servant端代码
+                    | -- bin    保存编译脚本, 编译文件等
+                    | -- cert   保存本机生成的公私密钥
+                    | -- conf   配置目录
+                    | -- logs   日志目录
+                    | -- src    源码目录
               | -- ken-test     测试用代码
 
 ## 关键点说明
