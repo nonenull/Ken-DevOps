@@ -47,7 +47,7 @@ func NewCMD() {
 		false,
 	)
 	if clientErr != nil {
-		logger.Error("连接 Master-Server 发生错误: \n", clientErr)
+		logger.Error("连接 Master-Server 发生错误: ", clientErr)
 		return
 	}
 	result, resultErr := client.Send(
@@ -57,7 +57,7 @@ func NewCMD() {
 		),
 	)
 	if resultErr != nil {
-		logger.Error("连接 Servant-Server 发生错误: \n", resultErr)
+		logger.Error("连接 Servant-Server 发生错误: ", resultErr)
 		return
 	}
 	pretyCMD(result)
@@ -77,6 +77,7 @@ func pretyCMD(responseData []byte) {
 
 		logger.Info(pretyResult)
 	} else {
-		logger.Exception("解析结果发生错误: \n", jsonErr)
+		logger.Exception(responseData)
+		//logger.Exception("解析结果发生错误: ", jsonErr)
 	}
 }

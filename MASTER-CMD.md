@@ -13,6 +13,8 @@ MASTER-CMD
        | -- src     源码目录
 
 ## 使用说明
+### 编译入口
+    ken-master/src/cmd.go
 
 ### Usage
     Usage: ./command [-S] [servantID] [func] [args]

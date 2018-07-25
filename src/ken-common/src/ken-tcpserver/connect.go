@@ -9,7 +9,7 @@ import (
 )
 
 type IParse interface {
-	Start(curPack []byte) (bool, map[string]interface{}, bool)
+	Start(curPack []byte) (bool, map[string]interface{}, error)
 }
 
 type Connect struct {
@@ -39,17 +39,20 @@ func (self *Connect) Handle() {
 		}
 		data = unPackData
 		var (
-			parseMap    map[string]interface{}
-			parseOK     bool
+			parseMap map[string]interface{}
+			parseErr error
 		)
-		self.KeepAlive, parseMap, parseOK = self.Parse.Start(packData)
-		if !parseOK {
-			continue
+		self.KeepAlive, parseMap, parseErr = self.Parse.Start(packData)
+		// 传输过来的包有问题的情况下, 返回错误, 并且断开连接
+		if parseErr != nil {
+			self.Conn.Write([]byte(ErrResponse(parseErr.Error())))
+			break
 		}
 		result := self.RunFunc(parseMap)
 		//fmt.Println("result==", result)
 		self.Conn.Write([]byte(result))
 		// 此处可hack, 在RunFunc中再修改keepalive的值
+		// 如果为短连接则在发送结果后断开连接
 		if !self.KeepAlive {
 			break
 		}
@@ -100,12 +103,18 @@ func (self *Connect) RunFunc(parseMap map[string]interface{}) string {
 		response.Error = errText[0].String()
 	}
 	jsonResponse, jsonErr := json.Marshal(response)
+	// 函数正常转为json并返回
 	if jsonErr == nil {
 		return string(jsonResponse) + ken_config.EndTag
 	}
+	// 转为json失败, 则生成error response 返回
+	return ErrResponse("转换执行结果发生错误,原因："+jsonErr.Error()) + ken_config.EndTag
+}
+
+func ErrResponse(errText string) string {
 	errorResponse := &Response{}
 	errorResponse.IsOK = false
-	errorResponse.Error = "转换执行结果发生错误,原因：" + jsonErr.Error()
+	errorResponse.Error = errText
 	errorJsonResponse, _ := json.Marshal(errorResponse)
-	return string(errorJsonResponse) + ken_config.EndTag
+	return string(errorJsonResponse)
 }

@@ -31,7 +31,7 @@ func Request(v map[string]interface{}) (result string, isOK bool, err error) {
 		logger.Debug("获取结果发生错误jsonErr : ", jsonErr.Error())
 		logger.Debug("获取结果发生错误responseData : ", string(responseData))
 		logger.Debug("获取结果发生错误responseErr : ", responseErr)
-		err = errors.New(responseErr.Error())
+		err = responseErr
 	}
 	return
 }
