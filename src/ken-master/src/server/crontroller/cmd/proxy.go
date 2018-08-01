@@ -136,7 +136,7 @@ func (self *ProxyCMD) searchSlave() error {
 	return nil
 }
 
-func NewRequest(hostname string, function string, args string, keepAlive bool) (responseData []byte, responseErr error) {
+func NewProxyCMD(hostname string, function string, args string, keepAlive bool) (responseData []byte, responseErr error) {
 	proxyCMD := new(ProxyCMD)
 	proxyCMD.Hostname = hostname
 	proxyCMD.Function = function

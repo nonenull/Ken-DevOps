@@ -1,4 +1,4 @@
-package cmd
+package cmder
 
 import (
 	"ken-master/src/config"
@@ -9,6 +9,7 @@ import (
 	"os"
 	"ken-common/src/ken-tcpserver"
 	"encoding/json"
+	"ken-common/src/ken-config"
 )
 
 /*
@@ -16,7 +17,6 @@ import (
 *	格式： ./command [-S] [slaverID] [func] [args]
 */
 func NewCMD() {
-	//logger.Debug("os.Args===",os.Args)
 	args := os.Args[1:]
 	if len(args) < 1 {
 		logger.Exception(`
@@ -32,14 +32,16 @@ func NewCMD() {
 		`)
 		return
 	}
-	isKeepAlive := !(args[0] == "-S")
+	// 判断是否需要保持连接, 加-S代表用短链接请求(master->servant之间)
+	// isKeepAlive: true 复用长连接, false 用短连接
+	isKeepAlive := args[0] != "-S"
 	var funcArgsList []string
 	if !isKeepAlive {
 		funcArgsList = args[1:]
 	} else {
 		funcArgsList = args[:]
 	}
-	funcArgs := strings.Join(funcArgsList, " ")
+	funcArgs := strings.Join(funcArgsList, ken_config.LineTag)
 	client, clientErr := ken_tcpclient.NewClient(
 		fmt.Sprint("127.0.0.1:", config.Fields.MASTER_LISTEN_PORT),
 		false,
@@ -53,7 +55,7 @@ func NewCMD() {
 	result, resultErr := client.Send(
 		ken_tcpclient.NewTcpClientPack(
 			"cmd.request",
-			fmt.Sprint(isKeepAlive, " ", funcArgs),
+			fmt.Sprint(isKeepAlive, ken_config.LineTag, funcArgs),
 		),
 	)
 	if resultErr != nil {
@@ -73,7 +75,7 @@ func pretyCMD(responseData []byte) {
 		%s
 	错误:
 		%s
-			`,response.IsOK, response.Result, response.Error)
+			`, response.IsOK, response.Result, response.Error)
 
 		logger.Info(pretyResult)
 	} else {

@@ -1,11 +1,11 @@
 package main
 
 import (
-	"ken-master/src/cmd"
 	"ken-master/src/logger"
+	"ken-master/src/cmder"
 )
 
 func main(){
 	logger.Debug("CMD MODE STARTED ...")
-	cmd.NewCMD()
+	cmder.NewCMD()
 }

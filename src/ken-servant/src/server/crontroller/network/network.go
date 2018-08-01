@@ -1,23 +1,32 @@
 package network
 
 import (
-	"errors"
 	"ken-master/src/logger"
+	"ken-common/src/ken-tcpserver"
 )
 
-func GetIP(v interface{}) (string, bool, error) {
-	//t := rand.Intn(5)
-	//time.Sleep(time.Duration(t) * time.Second)
-	request := v.(map[string]interface{})
-	args := request["args"].(map[string]string)
-	logger.Debug("args...==", args)
+func GetIP(request *ken_tcpserver.Request) *ken_tcpserver.Response {
+	if _, ok := request.KWargs["-h"]; ok {
+		return  &ken_tcpserver.Response{
+			`sufppp get ip`,
+			true,
+			"",
+		}
+	}
+
+	logger.Debug("kwargs...==", request.KWargs)
+	logger.Debug("args...==", request.Args)
 	var str string
-	for k, v := range args {
+	for k, v := range request.KWargs {
 		str += k + " " + v + " "
 	}
-	return str, true, errors.New("fucker")
-}
-
-func GetIP2(v interface{}) (string, bool, error) {
-	return "1.1.1.1", true, nil
+	var astr string
+	for _, b := range request.Args {
+		astr += b + "@"
+	}
+	return  &ken_tcpserver.Response{
+		"this is test \n" + str + "\n" + astr,
+		true,
+		"fucker",
+	}
 }

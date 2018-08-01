@@ -8,8 +8,22 @@ import (
 	"ken-common/src/ken-config"
 )
 
+type Request struct {
+	Conn 		*Connect
+	ActionName 	string
+	Action		interface{}
+	Args		[]string
+	KWargs 		map[string] string
+}
+
+type Response struct {
+	Result	string	`json:"result"`
+	IsOK	bool	`json:"ok"`
+	Error	string 	`json:"error"`
+}
+
 type IParse interface {
-	Start(curPack []byte) (bool, map[string]interface{}, error)
+	Start(curPack string) (bool, *Request, error)
 }
 
 type Connect struct {
@@ -39,16 +53,19 @@ func (self *Connect) Handle() {
 		}
 		data = unPackData
 		var (
-			parseMap map[string]interface{}
+			request *Request
 			parseErr error
 		)
-		self.KeepAlive, parseMap, parseErr = self.Parse.Start(packData)
+		self.KeepAlive, request, parseErr = self.Parse.Start(string(packData))
+		//logger.Debug("self.KeepAlive===", self.KeepAlive)
+		//logger.Debug("request===", request)
+		//logger.Debug("parseErr===", parseErr)
 		// 传输过来的包有问题的情况下, 返回错误, 并且断开连接
 		if parseErr != nil {
 			self.Conn.Write([]byte(ErrResponse(parseErr.Error())))
 			break
 		}
-		result := self.RunFunc(parseMap)
+		result := self.RunFunc(request)
 		//fmt.Println("result==", result)
 		self.Conn.Write([]byte(result))
 		// 此处可hack, 在RunFunc中再修改keepalive的值
@@ -76,7 +93,7 @@ func (self *Connect) UnPack(data []byte) ([]byte, []byte, bool) {
 		return nil, nil, false
 	}
 	packData := data[0:index]
-	data = data[index+len(EndTag):]
+	data = data[index + EndTagLen:]
 	return data, packData, true
 }
 
@@ -86,23 +103,17 @@ func (self *Connect) UnPack(data []byte) ([]byte, []byte, bool) {
 *	parseMap["action"]	func			函数对象
 *	parseMap["args"]	[][]byte  		参数
 */
-func (self *Connect) RunFunc(parseMap map[string]interface{}) string {
-	parseMap["conn"] = self
-	funcVal := reflect.ValueOf(parseMap["action"])
+func (self *Connect) RunFunc(request *Request) string {
+	request.Conn = self
+	funcVal := reflect.ValueOf(request.Action)
 	params := make([]reflect.Value, 1)
-	params[0] = reflect.ValueOf(parseMap)
-	result := funcVal.Call(params)
-	response := &Response{}
-	response.Result = result[0].String()
-	response.IsOK = result[1].Bool()
-	if result[2].Interface() == nil {
-		response.Error = ""
-	} else {
-		errFunc := result[2].MethodByName("Error")
-		errText := errFunc.Call(make([]reflect.Value, 0))
-		response.Error = errText[0].String()
+	params[0] = reflect.ValueOf(request)
+	response := funcVal.Call(params)[0]
+	if response.Type().String() != "*ken_tcpserver.Response" {
+		return ErrResponse("获取Servant返回值错误,原因：返回值类型错误, 非*ken_tcpserver.Response") + ken_config.EndTag
 	}
-	jsonResponse, jsonErr := json.Marshal(response)
+	jsonResponse, jsonErr := json.Marshal(response.Interface())
+
 	// 函数正常转为json并返回
 	if jsonErr == nil {
 		return string(jsonResponse) + ken_config.EndTag

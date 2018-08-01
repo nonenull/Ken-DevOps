@@ -9,17 +9,9 @@ import (
 )
 
 var (
-	LineTag        = []byte(ken_config.LineTag)
-	EndTag         = []byte(ken_config.EndTag)
-	KeepAliveTag   = []byte(ken_config.KeepAliveTag)
-	NoKeepAliveTag = []byte(ken_config.NoKeepAliveTag)
+	EndTag = []byte(ken_config.EndTag)
+	EndTagLen = len(EndTag)
 )
-
-type Response struct {
-	Result string `json:"result"`
-	IsOK   bool   `json:"ok"`
-	Error  string `json:"error"`
-}
 
 type Server struct {
 	Host         string
@@ -37,7 +29,7 @@ func (self *Server) Start() {
 	for {
 		// 接受新连接
 		var conn, acceptErr = listener.Accept()
-//		log.Println("获取到新连接: ", conn.RemoteAddr())
+		// log.Println("获取到新连接: ", conn.RemoteAddr())
 		if acceptErr != nil {
 			log.Println(fmt.Errorf("接受连接失败：", acceptErr))
 			break

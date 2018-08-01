@@ -1,63 +1,92 @@
 package server
 
 import (
-	"bytes"
-	"ken-common/src/ken-tcpserver"
-	"ken-master/src/logger"
-	"ken-servant/src/server/routers"
+	"ken-servant/src/logger"
 	"strings"
 	"fmt"
 	"errors"
+	"ken-common/src/ken-config"
+	"ken-common/src/ken-tcpserver"
+	"ken-servant/src/server/routers"
 )
 
-type Parse struct {
-}
+type Parse struct{}
 
-func (self *Parse) Start(curPack []byte)  (isKeepAlive bool, parseMap map[string]interface{}, parseErr error) {
-	//network.ip      parseMap["action"]
-	//-i eth0		  parseMap["args"]
-	parseMap = make(map[string]interface{})
-	var errText string
-	lineSplit := bytes.Split(curPack, ken_tcpserver.LineTag)
-	if len(lineSplit) < 3 {
-		errText = fmt.Sprint("报文格式不正确: ", string(curPack))
+/*
+*	大致格式:
+*	lineNum			packageContent
+*
+*		0		isKeepAlive\r\n
+*		1		function\r\n
+*		2		kwargs\r\n
+*		3		args\r\n
+*/
+func (self *Parse) Start(curPack string) (isKeepAlive bool, request *ken_tcpserver.Request, parseErr error) {
+	//logger.Debug(fmt.Sprintf("%q", curPack))
+	var (
+		errText string
+	)
+	request = &ken_tcpserver.Request{}
+	lineSplit := strings.Split(curPack, ken_config.LineTag)
+	lineSplitLen := len(lineSplit)
+	// 最短参数长度
+	if lineSplitLen < 2 {
+		errText = fmt.Sprint("报文格式不正确: ", curPack)
 		logger.Warning(errText)
 		parseErr = errors.New(errText)
 		return
 	}
-	actionName := bytes.ToLower(lineSplit[1])
-	action, ok := routers.RoutersList[string(actionName)]
-	if !ok {
-		errText = fmt.Sprint("没有获取到对应的函数: ", string(actionName))
-		logger.Warning(errText)
-		parseErr = errors.New(errText)
-		return
+	if lineSplitLen > 0 {
+		isKeepAliveStr := lineSplit[0]
+		isKeepAlive = strings.EqualFold(isKeepAliveStr, ken_config.KeepAliveTag)
 	}
-	parseMap["action"] = action
-	parseMap["args"] = self.ParseArgs(string(lineSplit[2]))
+	if lineSplitLen > 1 {
+		funcStr := lineSplit[1]
+		actionName := strings.ToLower(funcStr)
+		action, ok := routers.RoutersList[string(actionName)]
+		if !ok {
+			errText = fmt.Sprint("没有获取到对应的函数: ", actionName)
+			logger.Warning(errText)
+			parseErr = errors.New(errText)
+			return
+		}
+		request.Action = action
+	}
+	if lineSplitLen > 2 {
+		argsArray := lineSplit[2:]
+		request.KWargs, request.Args = self.ParseArgs(argsArray)
+	}
 	return
 }
 
 /*
 *	解析参数
 *	-i eth0 -t fuck 转化为 map[string]string
+*   "xxx xxx xxx" 类型的参数转为[]string
 */
-func (self *Parse) ParseArgs(argsStr string) map[string]string {
-	argsMap := make(map[string]string)
-	var argsSplit []string
-	argsSplit = strings.Split(argsStr, "-")
-	//logger.Debug("argsSplit===", argsSplit)
-	if len(argsSplit) < 2 {
-		logger.Warning("发现不合格参数: ", argsSplit)
-		return argsMap
-	}
-	// 参数是  -i xxx -b xxx 类型的
-	for _, value := range argsSplit {
-		if value == "" {
-			continue
+func (self *Parse) ParseArgs(argsArray []string) (kwargs map[string]string, args []string) {
+	kwargs = make(map[string]string)
+	argsArrayLen := len(argsArray)
+	if argsArrayLen > 0 {
+		kwargsStr := argsArray[0]
+		kwargsSplit := strings.Split(kwargsStr, "-")
+		logger.Debug("kwargsSplit===", kwargsSplit)
+		for _, value := range kwargsSplit {
+			if value == "" {
+				continue
+			}
+			valueSplit := strings.Split(value, " ")
+			logger.Debug("valueSplit===", valueSplit)
+			key := fmt.Sprint("-", valueSplit[0])
+			if len(valueSplit) > 1 {
+				kwargs[key] = valueSplit[1]
+			}else{
+				kwargs[key] = ""
+			}
 		}
-		valueSplit := strings.Split(value, " ")
-		argsMap[fmt.Sprint("-", valueSplit[0])] = valueSplit[1]
 	}
-	return argsMap
+	if argsArrayLen > 1 {
+		args = argsArray[1:]
+	}
+	return
 }

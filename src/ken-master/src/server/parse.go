@@ -1,45 +1,51 @@
 package server
 
 import (
-	"bytes"
 	"ken-common/src/ken-tcpserver"
+	"strings"
+	"ken-common/src/ken-config"
+	"fmt"
+	"errors"
 	"ken-master/src/logger"
 	"ken-master/src/server/routers"
-	"errors"
-	"fmt"
 )
 
-type Parse struct {
-}
+type Parse struct {}
 
-func (self *Parse) Start(curPack []byte) (isKeepAlive bool, parseMap map[string]interface{}, parseErr error) {
-	//network.ip      parseMap["action"]
-	//-i eth0		  parseMap["args"]
-	parseMap = make(map[string]interface{})
+
+/*
+*	大致格式:
+*	lineNum			packageContent
+*
+*		0		masterFunction\r\n
+*		1		isKeepAlive\r\n
+*		2		hostname\r\n
+*		3		slaverFunction\r\n
+*		4		kwargs\r\n
+*		5		args\r\n
+*/
+func (self *Parse) Start(curPack string) (isKeepAlive bool, request *ken_tcpserver.Request, parseErr error) {
 	var errText string
-	lineSplit := bytes.Split(curPack, ken_tcpserver.LineTag)
+	request = &ken_tcpserver.Request{}
+	lineSplit := strings.Split(curPack, ken_config.LineTag)
 	if len(lineSplit) < 3 {
-		errText = fmt.Sprint("报文格式不正确: ", string(curPack))
+		errText = fmt.Sprint("报文格式不正确: ", curPack)
 		logger.Warning(errText)
 		parseErr = errors.New(errText)
 		return
 	}
-	actionName := bytes.ToLower(lineSplit[1])
-	action, ok := routers.RoutersList[string(actionName)]
+	actionName := strings.ToLower(lineSplit[1])
+	request.ActionName = actionName
+	action, ok := routers.RoutersList[actionName]
 	if !ok {
-		errText = fmt.Sprint("没有获取到对应的函数: ", string(actionName))
+		errText = fmt.Sprint("没有获取到对应的函数: ", actionName)
 		logger.Warning(errText)
 		parseErr = errors.New(errText)
 		return
 	}
-	for k, v := range lineSplit {
-		logger.Debug("lineSplit ==", k, "===", string(v))
-	}
-
-	logger.Debug("routers.RoutersList ==", routers.RoutersList)
-
-	parseMap["action"] = action
-	parseMap["args"] = lineSplit[2:]
-	isKeepAlive = bytes.Equal(bytes.ToLower(lineSplit[0]), ken_tcpserver.KeepAliveTag)
+	//logger.Debug("routers.RoutersList ==", routers.RoutersList)
+	request.Args = lineSplit[2:]
+	request.Action = action
+	isKeepAlive = strings.EqualFold(lineSplit[0], ken_config.KeepAliveTag)
 	return
 }
