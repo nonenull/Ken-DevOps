@@ -30,8 +30,9 @@ func init() {
 	// 检查日志目录，如果目录不存在，创建
 	logPath := config.Fields.LOG_PATH
 	logLevel := config.Fields.LOG_LEVEL
+	logName := config.Fields.LOG_NAME
 	checkPath(logPath)
-	logger = ken_logger.NewLogger(logLevel, logPath)
+	logger = ken_logger.NewLogger(logLevel, logPath, logName)
 }
 
 func Debug(v ... interface{}) {

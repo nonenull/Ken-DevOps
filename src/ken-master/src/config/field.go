@@ -10,6 +10,7 @@ type mFields struct {
 
 	LOG_PATH  string "../logs"
 	LOG_LEVEL string "DEBUG"
+	LOG_NAME  string "master.log"
 
 	CERTS_PATH string "../certs"
 }
