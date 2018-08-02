@@ -53,7 +53,6 @@ func (self *Connect) Handle() {
 	readBuf := make([]byte, ken_config.ReadBuffSize)
 	for {
 		readLen, err := self.Conn.Read(readBuf)
-		//log.Print("read data : ", string(readBuf[:readLen]))
 		// 当有错误时间发生时，跳出循环，将断开连接
 		// 短链接在此触发io.EOF,跳出循环，断开连接
 		if err != nil {
@@ -71,9 +70,6 @@ func (self *Connect) Handle() {
 			parseErr error
 		)
 		self.KeepAlive, request, parseErr = self.Parse.Start(string(packData))
-		//logger.Debug("self.KeepAlive===", self.KeepAlive)
-		//logger.Debug("request===", request)
-		//logger.Debug("parseErr===", parseErr)
 		// 传输过来的包有问题的情况下, 返回错误, 并且断开连接
 		if parseErr != nil {
 			self.Conn.Write([]byte(ErrResponse(parseErr.Error())))
