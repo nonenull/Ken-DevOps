@@ -6,6 +6,8 @@ import (
 	"reflect"
 	"encoding/json"
 	"ken-common/src/ken-config"
+	"log"
+	"fmt"
 )
 
 type Request struct {
@@ -35,6 +37,18 @@ type Connect struct {
 
 func (self *Connect) Handle() {
 	defer self.Conn.Close()
+	// 防止发生代码逻辑引发的panic错误导致进程退出
+	defer func() {
+		if err := recover(); err != nil{
+			errText := err.(string)
+			self.Conn.Write(
+				[]byte(ErrResponse(
+					fmt.Sprint("system error: ", errText),
+				)),
+			)
+			log.Println("system error: ", errText)
+		}
+	}()
 	var data []byte
 	readBuf := make([]byte, ken_config.ReadBuffSize)
 	for {
