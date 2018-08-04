@@ -11,10 +11,10 @@ import (
 	"ken-common/src/ken-tcpserver"
 )
 
-func AddCert(v map[string]interface{}) (string, bool, error) {
-	conn := v["conn"].(*ken_tcpserver.Connect)
+func AddCert(request *ken_tcpserver.Request) *ken_tcpserver.Response {
+	conn := request.Conn
 	remoteAddr := conn.Conn.RemoteAddr().String()
-	args := v["args"].([][]byte)
+	args := request.Args
 	hostname := args[0]
 	ipAndHost := getIP(remoteAddr) + "@" + string(hostname)
 	logger.Debug("host==", ipAndHost)
@@ -23,7 +23,11 @@ func AddCert(v map[string]interface{}) (string, bool, error) {
 	// 写入证书
 	certSavePath := path.Join(config.Fields.CERTS_PATH, ipAndHost)
 	saveErr := ioutil.WriteFile(certSavePath, decryptCertText, 0600)
-	return "", saveErr == nil, saveErr
+	return &ken_tcpserver.Response{
+		"",
+		saveErr == nil,
+		saveErr.Error(),
+	}
 }
 
 /*
@@ -48,11 +52,11 @@ func decryptCert(randInt int, cert []byte) []byte {
 *		randInt	int 	随机数
 *		cert 	[]byte	混淆的证书
 */
-func departCert(cert []byte) (int, []byte) {
+func departCert(cert string) (int, []byte) {
 	certLen := len(cert)
 	certText := cert[:certLen-1]
 	randInt, _ := strconv.ParseInt(string(cert[certLen-1:]), 10, 64)
-	return int(randInt), certText
+	return int(randInt), []byte(certText)
 }
 
 func getIP(remoteAddr string) string {

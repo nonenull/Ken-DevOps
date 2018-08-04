@@ -8,7 +8,7 @@ type mFields struct {
 	SERVANT_LISTEN_PORT int    "6578"
 
 	LOG_PATH  string "../logs"
-	LOG_NAME  string "access.log"
+	LOG_NAME  string "servant.log"
 	LOG_LEVEL string "DEBUG"
 
 	CERT_PATH string "../cert"

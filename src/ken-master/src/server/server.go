@@ -10,6 +10,7 @@ func NewServer() {
 	host := config.Fields.MASTER_LISTEN_HOST
 	port := config.Fields.MASTER_LISTEN_PORT
 	logger.Info(host, ":", port, " start listen")
+	ken_tcpserver.SetTcpServerLogger(logger.Logger)
 	server := ken_tcpserver.Server{
 		Host:         host,
 		Port:         port,

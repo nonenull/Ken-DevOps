@@ -3,7 +3,6 @@ package ken_tcpserver
 import (
 	"net"
 	"fmt"
-	"log"
 	"crypto/tls"
 	"ken-common/src/ken-config"
 )
@@ -24,14 +23,14 @@ type Server struct {
 func (self *Server) Start() {
 	listener, err, ok := self.GetListener()
 	if !ok {
-		log.Fatal("服务监听失败: ", err)
+		logger.Exception("服务监听失败: ", err)
 	}
 	for {
 		// 接受新连接
 		var conn, acceptErr = listener.Accept()
 		// log.Println("获取到新连接: ", conn.RemoteAddr())
 		if acceptErr != nil {
-			log.Println(fmt.Errorf("接受连接失败：", acceptErr))
+			logger.Error("接受连接失败：", acceptErr)
 			break
 		}
 		go func() {
@@ -58,8 +57,4 @@ func (self *Server) GetListener() (listener net.Listener, err error, ok bool) {
 	config := &tls.Config{Certificates: []tls.Certificate{cert}}
 	listener, err = tls.Listen("tcp", address, config)
 	return listener, err, (err == nil)
-}
-
-func init() {
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
 }

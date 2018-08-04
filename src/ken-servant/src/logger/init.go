@@ -23,7 +23,7 @@ func checkPath(filaPath string) {
 	}
 }
 
-var logger *ken_logger.Logger
+var Logger *ken_logger.Logger
 
 // 一点准备工作
 func init() {
@@ -32,22 +32,22 @@ func init() {
 	logLevel := config.Fields.LOG_LEVEL
 	logName := config.Fields.LOG_NAME
 	checkPath(logPath)
-	logger = ken_logger.NewLogger(logLevel, logPath, logName)
+	Logger = ken_logger.NewLogger(logLevel, logPath, logName)
 }
 
 func Debug(v ... interface{}) {
-	logger.OutPut("DEBUG", v...)
+	Logger.OutPut("DEBUG", v...)
 }
 func Warning(v ... interface{}) {
-	logger.OutPut("WARNING", v...)
+	Logger.OutPut("WARNING", v...)
 }
 
 func Info(v ... interface{}) {
-	logger.OutPut("INFO", v...)
+	Logger.OutPut("INFO", v...)
 }
 
 func Error(v ... interface{}) {
-	logger.OutPut("ERROR", v...)
+	Logger.OutPut("ERROR", v...)
 }
 
 func Exception(v ... interface{}) {

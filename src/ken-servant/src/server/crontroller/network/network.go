@@ -1,7 +1,7 @@
 package network
 
 import (
-	"ken-master/src/logger"
+	"ken-servant/src/logger"
 	"ken-common/src/ken-tcpserver"
 )
 

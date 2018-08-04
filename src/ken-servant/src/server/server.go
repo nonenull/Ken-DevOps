@@ -12,6 +12,8 @@ func NewServer() {
 	port := config.Fields.SERVANT_LISTEN_PORT
 	certPath := config.Fields.CERT_PATH
 	logger.Info(host, ":", port, " start listen")
+
+	ken_tcpserver.SetTcpServerLogger(logger.Logger)
 	server := ken_tcpserver.Server{
 		Host: host,
 		Port: port,

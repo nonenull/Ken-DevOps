@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"encoding/json"
 	"ken-common/src/ken-config"
-	"log"
 	"fmt"
+	"runtime/debug"
 )
 
 type Request struct {
@@ -40,13 +40,11 @@ func (self *Connect) Handle() {
 	// 防止发生代码逻辑引发的panic错误导致进程退出
 	defer func() {
 		if err := recover(); err != nil{
-			errText := err.(string)
+			errText := fmt.Sprint("代码发生错误, 请在log文件里查看详细信息: ", err)
 			self.Conn.Write(
-				[]byte(ErrResponse(
-					fmt.Sprint("system error: ", errText),
-				)),
+				[]byte(ErrResponse(errText)),
 			)
-			log.Println("system error: ", errText)
+			logger.Error(fmt.Sprintf("%v\n%s", err, debug.Stack()))
 		}
 	}()
 	var data []byte

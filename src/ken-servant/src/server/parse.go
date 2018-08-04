@@ -22,7 +22,6 @@ type Parse struct{}
 *		3		args\r\n
 */
 func (self *Parse) Start(curPack string) (isKeepAlive bool, request *ken_tcpserver.Request, parseErr error) {
-	//logger.Debug(fmt.Sprintf("%q", curPack))
 	var (
 		errText string
 	)
@@ -70,13 +69,13 @@ func (self *Parse) ParseArgs(argsArray []string) (kwargs map[string]string, args
 	if argsArrayLen > 0 {
 		kwargsStr := argsArray[0]
 		kwargsSplit := strings.Split(kwargsStr, "-")
-		logger.Debug("kwargsSplit===", kwargsSplit)
+		//logger.Debug("kwargsSplit===", kwargsSplit)
 		for _, value := range kwargsSplit {
 			if value == "" {
 				continue
 			}
 			valueSplit := strings.Split(value, " ")
-			logger.Debug("valueSplit===", valueSplit)
+			//logger.Debug("valueSplit===", valueSplit)
 			key := fmt.Sprint("-", valueSplit[0])
 			if len(valueSplit) > 1 {
 				kwargs[key] = valueSplit[1]
